@@ -1,46 +1,58 @@
 name: Lint & Test
 
 on:
-  - push
-  - pull_request
-  - pull_request_target
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
-
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   test:
     name: Test with Symfony ${{ matrix.symfony-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        symfony-version: ['^4', '^5', '^6']
+        symfony-version: ["^4", "^5", "^6"]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Cache Composer dependencies
+      - name: Setup PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: xdebug
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
         uses: actions/cache@v3
         with:
-          path: /tmp/composer-cache
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: "8.1"
+        run: >-
+          composer update --no-ansi --no-interaction --no-progress &&
+          composer require symfony/http-foundation:${{ matrix.symfony-version }}
 
-      - name: Install symfony/http-foundation
-        uses: php-actions/composer@v6
-        with:
-          php_version: "8.1"
-          command: require
-          args: symfony/http-foundation:${{ matrix.symfony-version }}
+      - name: Run tests
+        run: composer run-script test-ci
 
-      - name: Test
-        uses: php-actions/composer@v6
-        with:
-          php_version: "8.1"
-          command: run-script
-          args: test
+      - name: Fix code coverage paths
+        if: matrix.symfony-version == '^6'
+        run: sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
+
+      - name: SonarCloud Scan
+        if: matrix.symfony-version == '^6'
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   lint:
     name: Lint with PHPStan
@@ -65,3 +77,4 @@ jobs:
           php_version: "8.1"
           command: run-script
           args: analyze
+
