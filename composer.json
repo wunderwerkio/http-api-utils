@@ -23,6 +23,7 @@
   },
   "scripts": {
     "test": "phpunit --testdox tests",
+    "test-ci": "phpunit --coverage-clover=coverage.xml --coverage-filter src tests",
     "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-text --coverage-filter src --testdox tests",
     "analyze": "phpstan analyse --level 8 src tests"
   },
