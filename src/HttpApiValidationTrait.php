@@ -61,7 +61,7 @@ trait HttpApiValidationTrait {
   /**
    * Validate a JSON object with given schema.
    *
-   * @param array<mixed> $payload
+   * @param mixed $payload
    *   The JSON object to validate.
    * @param array<string, mixed>|object $schema
    *   The JSON schema to validate against.
@@ -71,7 +71,7 @@ trait HttpApiValidationTrait {
    * @return \Wunderwerk\HttpApiUtils\Validation\ValidationResult
    *   The validation result.
    */
-  protected function validateArray(array $payload, array|object $schema, ?int $checkMode = NULL) {
+  protected function validateArray(mixed $payload, array|object $schema, ?int $checkMode = NULL) {
     $data = $this->getValidator()->arrayToObjectRecursive($payload);
 
     return $this->validateDataStructure($data, $schema, $checkMode);

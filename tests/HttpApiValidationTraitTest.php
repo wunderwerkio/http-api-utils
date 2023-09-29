@@ -121,6 +121,29 @@ final class HttpApiValidationTraitTest extends TestCase {
   }
 
   #[Test]
+  public function canHandleNonArrayValidation(): void {
+    $result = $this->validateArray("non-array", $this->schema);
+    $this->assertFalse($result->isValid());
+    $this->assertEquals('name', $result->getErrors()[0]['property']);
+
+    $result = $this->validateArray(NULL, $this->schema);
+    $this->assertFalse($result->isValid());
+    $this->assertEquals('name', $result->getErrors()[0]['property']);
+
+    $result = $this->validateArray(1, $this->schema);
+    $this->assertFalse($result->isValid());
+    $this->assertEquals('name', $result->getErrors()[0]['property']);
+
+    $result = $this->validateArray(FALSE, $this->schema);
+    $this->assertFalse($result->isValid());
+    $this->assertEquals('name', $result->getErrors()[0]['property']);
+
+    $result = $this->validateArray(new stdClass(), $this->schema);
+    $this->assertFalse($result->isValid());
+    $this->assertEquals('name', $result->getErrors()[0]['property']);
+  }
+
+  #[Test]
   public function canReturnErrorResponse(): void {
     $validInput = (object) [
       'name' => 'Max',
