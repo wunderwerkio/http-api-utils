@@ -6,57 +6,39 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
-  test:
-    name: Test with Symfony ${{ matrix.symfony-version }}
-    runs-on: ubuntu-latest
+  lint_test:
+    name: Lint & Test
+    runs-on: nixos
     strategy:
       matrix:
-        symfony-version: ["^4", "^5", "^6"]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup PHP with Xdebug
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.1"
-          coverage: xdebug
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: >-
-          composer update --no-ansi --no-interaction --no-progress &&
-          composer require symfony/http-foundation:${{ matrix.symfony-version }}
-
-      - name: Run tests
-        run: composer run-script test-ci
-
-      - name: Fix code coverage paths
-        if: matrix.symfony-version == '^6'
-        run: sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
-
-      - name: SonarCloud Scan
-        if: matrix.symfony-version == '^6'
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  lint:
-    name: Lint with PHPStan
-    runs-on: ubuntu-latest
+        reqs:
+          - symfony: "^5"
+            shell: "php81"
+          - symfony: "^5"
+            shell: "php82"
+          - symfony: "^5"
+            shell: "php83"
+          - symfony: "^6"
+            shell: "php81"
+          - symfony: "^6"
+            shell: "php82"
+          - symfony: "^6"
+            shell: "php83"
+          - symfony: "^7"
+            shell: "php82"
+          - symfony: "^7"
+            shell: "php83"
+          - symfony: "^6"
+            shell: "php84"
+          - symfony: "^7"
+            shell: "php84"
+    defaults:
+      run:
+        shell: nix develop .#${{ matrix.reqs.shell }} --command bash {0}
     steps:
       - uses: actions/checkout@v3
 
@@ -67,14 +49,15 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
 
       - name: Install dependencies
-        uses: php-actions/composer@v6
-        with:
-          php_version: "8.1"
+        run: >-
+          composer update --no-ansi --no-interaction --no-progress &&
+          composer require symfony/http-foundation:${{ matrix.reqs.symfony }}
 
-      - name: Lint
-        uses: php-actions/composer@v6
-        with:
-          php_version: "8.1"
-          command: run-script
-          args: analyze
+      - name: PHPCS
+        run: ./vendor/bin/phpcs -s src tests
 
+      - name: PHPStan
+        run: ./vendor/bin/phpstan analyse --level 8 src tests
+
+      - name: PHPUnit
+        run: ./vendor/bin/phpunit tests
