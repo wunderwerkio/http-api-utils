@@ -24,7 +24,7 @@ class ValidationResult {
    *   Array of validation errors.
    */
   public function __construct(
-    protected readonly array $errors
+    protected readonly array $errors,
   ) {
     $this->isValid = empty($errors);
   }
@@ -36,7 +36,7 @@ class ValidationResult {
     return $this->isValid;
   }
 
-  /** 
+  /**
    * Get the validation errors.
    *
    * @return array{property: string, pointer: string, message: string, constraint: string, pattern?: string}[]
@@ -83,4 +83,3 @@ class ValidationResult {
   }
 
 }
-

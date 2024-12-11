@@ -7,17 +7,21 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Wunderwerk\HttpApiUtils\HttpApiValidationTrait;
-use Wunderwerk\JsonApiError\JsonApiErrorResponse;
 
+/**
+ * Test class for HttpApiValidationTrait.
+ */
 #[CoversClass(HttpApiValidationTrait::class)]
 final class HttpApiValidationTraitTest extends TestCase {
 
   use HttpApiValidationTrait;
 
   /**
-   * @var mixed
+   * The JSON schema to use for testing.
+   *
+   * @var array<string, mixed>
    */
-  private $schema = [
+  private array $schema = [
     "type" => "object",
     "properties" => [
       "name" => [
@@ -33,6 +37,9 @@ final class HttpApiValidationTraitTest extends TestCase {
     "required" => ["name"],
   ];
 
+  /**
+   * Test validateDataStructure().
+   */
   #[Test]
   public function canValidateDataStructure(): void {
     $validInput = (object) [
@@ -54,13 +61,16 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals('name', $result->getErrors()[0]['property']);
   }
 
+  /**
+   * Test validateDataStructure() with specific check mode.
+   */
   #[Test]
   public function canValidateWithSpecificCheckMode(): void {
     // Age should be an integer.
     // With default check mode, the validation does not pass.
     $validInput = (object) [
       'name' => 'Max',
-      'age' => '42'
+      'age' => '42',
     ];
 
     $result = $this->validateDataStructure($validInput, $this->schema);
@@ -70,7 +80,7 @@ final class HttpApiValidationTraitTest extends TestCase {
     // to an integer.
     $validInput = (object) [
       'name' => 'Max',
-      'age' => '42'
+      'age' => '42',
     ];
 
     $result = $this->validateDataStructure($validInput, $this->schema, Constraint::CHECK_MODE_COERCE_TYPES);
@@ -78,6 +88,9 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals("integer", gettype($validInput->age));
   }
 
+  /**
+   * Test validateJsonString().
+   */
   #[Test]
   public function canValidateJsonString(): void {
     $validInput = (string) json_encode([
@@ -99,6 +112,9 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals('name', $result->getErrors()[0]['property']);
   }
 
+  /**
+   * Test validateArray().
+   */
   #[Test]
   public function canValidateArray(): void {
     $validInput = [
@@ -120,6 +136,9 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals('name', $result->getErrors()[0]['property']);
   }
 
+  /**
+   * Test validateArray() with non-array input.
+   */
   #[Test]
   public function canHandleNonArrayValidation(): void {
     $result = $this->validateArray("non-array", $this->schema);
@@ -143,6 +162,9 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals('name', $result->getErrors()[0]['property']);
   }
 
+  /**
+   * Test validateDataStructure() with error response.
+   */
   #[Test]
   public function canReturnErrorResponse(): void {
     $validInput = (object) [
@@ -160,7 +182,7 @@ final class HttpApiValidationTraitTest extends TestCase {
 
     $result = $this->validateDataStructure($invalidInput, $this->schema);
 
-    /** @var JsonApiErrorResponse $response */
+    /** @var \Wunderwerk\JsonApiError\JsonApiErrorResponse $response */
     $response = $result->getResponse();
 
     $this->assertEquals(422, $response->getStatusCode());
@@ -177,7 +199,7 @@ final class HttpApiValidationTraitTest extends TestCase {
           'detail' => 'Invalid property value for "name": The property name is required',
           'meta' => [
             'constraint' => 'required',
-          ]
+          ],
         ],
         [
           'status' => 422,
@@ -189,9 +211,9 @@ final class HttpApiValidationTraitTest extends TestCase {
           'detail' => 'Invalid property value for "description": Boolean value found, but a string is required',
           'meta' => [
             'constraint' => 'type',
-          ]
-        ]
-      ]
+          ],
+        ],
+      ],
     ], JSON_HEX_QUOT);
 
     $this->assertEquals($expected, $response->getContent());
