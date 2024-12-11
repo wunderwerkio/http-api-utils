@@ -188,9 +188,19 @@ final class HttpApiValidationTraitTest extends TestCase {
     $this->assertEquals(422, $response->getStatusCode());
 
     $expected = json_encode([
+      'jsonapi' => [
+        'version' => '1.0',
+        'meta' => [
+          'links' => [
+            'self' => [
+              'href' => 'http://jsonapi.org/format/1.0/',
+            ],
+          ],
+        ],
+      ],
       'errors' => [
         [
-          'status' => 422,
+          'status' => '422',
           'code' => 'validation_error',
           'source' => [
             'pointer' => '/name',
@@ -202,7 +212,7 @@ final class HttpApiValidationTraitTest extends TestCase {
           ],
         ],
         [
-          'status' => 422,
+          'status' => '422',
           'code' => 'validation_error',
           'source' => [
             'pointer' => '/description',
