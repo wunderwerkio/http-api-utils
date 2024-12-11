@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1c779cf942402c0ce118c9742549941",
+    "content-hash": "9f21726701f6d08ee027fa66bb6820ea",
     "packages": [
         {
             "name": "justinrainbow/json-schema",
@@ -374,7 +374,7 @@
         },
         {
             "name": "wunderwerkio/jsonapi-error",
-            "version": "0.1.7",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wunderwerkio/jsonapi-error.git",
@@ -416,7 +416,7 @@
             "description": "Simple class to conveniently create a JSON error that complies with the JSON:API specification.",
             "support": {
                 "issues": "https://github.com/wunderwerkio/jsonapi-error/issues",
-                "source": "https://github.com/wunderwerkio/jsonapi-error/tree/0.1.7"
+                "source": "https://github.com/wunderwerkio/jsonapi-error/tree/1.0.0"
             },
             "time": "2024-12-11T14:13:11+00:00"
         }
