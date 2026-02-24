@@ -72,7 +72,9 @@ trait HttpApiValidationTrait {
    *   The validation result.
    */
   protected function validateArray(mixed $payload, array|object $schema, ?int $checkMode = NULL) {
-    $data = $this->getValidator()->arrayToObjectRecursive($payload);
+    $data = is_array($payload)
+      ? $this->getValidator()->arrayToObjectRecursive($payload)
+      : (object) [];
 
     return $this->validateDataStructure($data, $schema, $checkMode);
   }
