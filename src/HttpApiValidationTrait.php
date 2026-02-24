@@ -24,7 +24,7 @@ trait HttpApiValidationTrait {
    *   The data structure to validate.
    * @param array<string, mixed>|object $schema
    *   The JSON schema to validate against.
-   * @param int|null $checkMode
+   * @param int<0, 1023>|null $checkMode
    *   The check mode to use, see \JsonSchema\Validator::CHECK_MODE_*.
    *
    * @return \Wunderwerk\HttpApiUtils\Validation\ValidationResult
@@ -46,7 +46,7 @@ trait HttpApiValidationTrait {
    *   The JSON string to validate.
    * @param array<string, mixed>|object $schema
    *   The JSON schema to validate against.
-   * @param int|null $checkMode
+   * @param int<0, 1023>|null $checkMode
    *   The check mode to use, see \JsonSchema\Validator::CHECK_MODE_*.
    *
    * @return \Wunderwerk\HttpApiUtils\Validation\ValidationResult
@@ -65,7 +65,7 @@ trait HttpApiValidationTrait {
    *   The JSON object to validate.
    * @param array<string, mixed>|object $schema
    *   The JSON schema to validate against.
-   * @param int|null $checkMode
+   * @param int<0, 1023>|null $checkMode
    *   The check mode to use, see \JsonSchema\Validator::CHECK_MODE_*.
    *
    * @return \Wunderwerk\HttpApiUtils\Validation\ValidationResult
