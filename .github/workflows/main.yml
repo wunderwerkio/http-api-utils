@@ -12,41 +12,52 @@ env:
 jobs:
   lint_test:
     name: Lint & Test
-    runs-on: nixos
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     strategy:
       matrix:
         reqs:
           - symfony: "^5"
-            shell: "php81"
+            php: "8.1"
           - symfony: "^5"
-            shell: "php82"
+            php: "8.2"
           - symfony: "^5"
-            shell: "php83"
+            php: "8.3"
           - symfony: "^6"
-            shell: "php81"
+            php: "8.1"
           - symfony: "^6"
-            shell: "php82"
+            php: "8.2"
           - symfony: "^6"
-            shell: "php83"
+            php: "8.3"
           - symfony: "^7"
-            shell: "php82"
+            php: "8.2"
           - symfony: "^7"
-            shell: "php83"
+            php: "8.3"
           - symfony: "^6"
-            shell: "php84"
+            php: "8.4"
           - symfony: "^7"
-            shell: "php84"
-    defaults:
-      run:
-        shell: nix develop .#${{ matrix.reqs.shell }} --command bash {0}
+            php: "8.4"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.reqs.php }}
+          tools: composer
+          coverage: none
+        env:
+          runner: "blacksmith"
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: /tmp/composer-cache
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php${{ matrix.reqs.php }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-php${{ matrix.reqs.php }}-
 
       - name: Install dependencies
         run: >-
