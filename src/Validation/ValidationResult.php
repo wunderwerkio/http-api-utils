@@ -20,7 +20,7 @@ class ValidationResult {
   /**
    * Construct new validation result.
    *
-   * @param array{property: string, pointer: string, message: string, constraint: string, pattern?: string}[] $errors
+   * @param array{property: string, pointer: string, message: string, constraint: string|array{name: string, params: array<mixed>}, pattern?: string}[] $errors
    *   Array of validation errors.
    */
   public function __construct(
@@ -39,7 +39,7 @@ class ValidationResult {
   /**
    * Get the validation errors.
    *
-   * @return array{property: string, pointer: string, message: string, constraint: string, pattern?: string}[]
+   * @return array{property: string, pointer: string, message: string, constraint: string|array{name: string, params: array<mixed>}, pattern?: string}[]
    *   The validation errors.
    */
   public function getErrors(): array {
@@ -65,6 +65,11 @@ class ValidationResult {
     $errors = [];
 
     foreach ($this->getErrors() as $error) {
+      $constraint = $error['constraint'];
+      if (is_array($constraint)) {
+        $constraint = $constraint['name'];
+      }
+
       $errors[] = new JsonApiError(
         status: 422,
         code: 'validation_error',
@@ -74,7 +79,7 @@ class ValidationResult {
           'pointer' => $error['pointer'],
         ],
         meta: [
-          'constraint' => $error['constraint'],
+          'constraint' => $constraint,
         ],
       );
     }
